@@ -5,24 +5,19 @@ import axios from 'axios';
 
 axios.defaults.baseURL = 'https://pixabay.com/api/';
 
-export async function responseData(
-  requestWords,
-  additionalParams = {},
-  page = 1
-) {
-  const reqestParams = {
+export async function responseData(requestWords, page = 1) {
+  const params = {
     key: '49272449-54e018c7c1ace9d1b8dfc3596',
     q: requestWords,
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: true,
     per_page: 15,
-    page: page,
-    ...additionalParams,
+    page,
   };
   try {
     const response = await axios.get('', {
-      params: reqestParams,
+      params,
     });
 
     return response.data;

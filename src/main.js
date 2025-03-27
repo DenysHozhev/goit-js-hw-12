@@ -10,12 +10,11 @@ import { createGalleryMarkup, clearGallery } from './js/render-functions';
 const form = document.querySelector('.form');
 const loader = document.querySelector('.loader');
 const gallery = document.querySelector('.gallery');
-const button = document.querySelector('.button');
+const loadButton = document.querySelector('.js-button');
 
-let totalHits = 0;
-let loadedImages = 0;
 let query = '';
 let currentPage = 1;
+let totalHits = 0; // Глобальная переменная для общего количества изображений
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captions: true,
@@ -25,27 +24,32 @@ const lightbox = new SimpleLightbox('.gallery a', {
 });
 
 form.addEventListener('submit', userInputForm);
-button.addEventListener('click', loadMoreImage);
+loadButton.addEventListener('click', loadMoreImage);
 
 async function userInputForm(event) {
   event.preventDefault();
   query = event.currentTarget.elements['search-text'].value.trim();
 
-  if (!query) return;
+  if (!query) {
+    return;
+  }
 
   loader.classList.remove('hidden');
   clearGallery();
   form.reset();
-  loadedImages = 0;
   currentPage = 1;
 
   try {
-    const data = await responseData(query, {}, currentPage);
-    const images = data.hits;
-    totalHits = data.totalHits;
-    loadedImages += images.length;
+    const { hits, totalHits: fetchedTotalHits } = await responseData(
+      query,
+      currentPage
+    );
 
-    if (images.length === 0) {
+    // Логирование всей структуры ответа
+    console.log('API Response:', { hits, totalHits: fetchedTotalHits });
+
+    // Проверка на отсутствие данных
+    if (!hits || hits.length === 0) {
       iziToast.error({
         title: 'Sorry',
         message: 'No images found, please try another search.',
@@ -54,25 +58,21 @@ async function userInputForm(event) {
       return;
     }
 
-    renderImages(images);
+    // Обновляем глобальное количество изображений
+    totalHits = fetchedTotalHits;
+
+    renderImages(hits);
     lightbox.refresh();
 
-    const galleryHeightBefore = gallery.scrollHeight;
-    const galleryHeightAfter = gallery.scrollHeight;
-    window.scrollBy({
-      top: galleryHeightAfter - galleryHeightBefore,
-      behavior: 'smooth',
-    });
-
-    if (loadedImages >= totalHits) {
+    if (Math.ceil(totalHits / 15) === currentPage) {
       iziToast.show({
         title: 'End of search',
         message: 'You have reached the end of the collection.',
         position: 'topRight',
       });
-      button.classList.add('hidden');
+      loadButton.classList.add('hidden');
     } else {
-      button.classList.remove('hidden');
+      loadButton.classList.remove('hidden');
     }
   } catch (error) {
     iziToast.error({
@@ -86,27 +86,39 @@ async function userInputForm(event) {
 }
 
 function renderImages(images) {
-  gallery.insertAdjacentHTML('beforeend', createGalleryMarkup(images));
-  lightbox.refresh();
+  if (Array.isArray(images) && images.length > 0) {
+    console.log('Rendering images:', images); // Логируем перед рендером
+    gallery.insertAdjacentHTML('beforeend', createGalleryMarkup(images));
+    lightbox.refresh();
+  } else {
+    console.warn('No valid images to render.');
+  }
 }
 
 async function loadMoreImage() {
-  if (loadedImages < totalHits) {
+  if (currentPage * 15 < totalHits) {
     loader.classList.remove('hidden');
     currentPage += 1;
-    try {
-      const data = await responseData(query, {}, currentPage);
-      const images = data.hits;
-      loadedImages += images.length;
-      renderImages(images);
 
-      if (loadedImages >= totalHits) {
+    try {
+      const { hits } = await responseData(query, currentPage);
+
+      console.log('Hits on load more:', hits);
+
+      // Проверка на пустой ответ
+      if (hits && hits.length > 0) {
+        renderImages(hits);
+      } else {
+        console.warn('No more images found.');
+      }
+
+      if (Math.ceil(totalHits / 15) === currentPage) {
         iziToast.show({
           title: 'End of search',
           message: 'You have reached the end of the collection.',
           position: 'topRight',
         });
-        button.classList.add('hidden');
+        loadButton.classList.add('hidden');
       }
     } catch (error) {
       iziToast.error({

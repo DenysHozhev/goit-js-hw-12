@@ -40,6 +40,7 @@
     transform: rotate(360deg);
   }
 }
+
 .form {
   margin: 0 auto;
   margin-bottom: 20px;
@@ -54,18 +55,47 @@
   font-size: 12px;
   cursor: pointer;
 }
+
 .gallery-item {
   list-style: none;
+  transition: transform 0.5s ease;
 }
-.gallery-item :hover {
+
+.gallery-item:hover {
   transform: scale(1.05);
-  transition: 0.5s;
 }
+
 .gallery-image {
   width: 360px;
   height: 200px;
+  object-fit: cover; /* Задати масштабування зображення */
   cursor: pointer;
 }
+
 .hidden {
   display: none;
+}
+
+/* Стилі для кнопки Load More */
+.js-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 20px auto;
+  background-color: #ff3d00;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.js-button:hover {
+  background-color: #e63946;
+}
+
+.js-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
 }

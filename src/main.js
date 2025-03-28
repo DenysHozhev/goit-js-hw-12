@@ -55,6 +55,7 @@ async function userInputForm(event) {
         message: 'No images found, please try another search.',
         position: 'topRight',
       });
+      loadButton.classList.add('hidden');
       return;
     }
 

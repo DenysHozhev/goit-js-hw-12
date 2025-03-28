@@ -89,7 +89,7 @@ async function userInputForm(event) {
 function renderImages(images) {
   if (Array.isArray(images) && images.length > 0) {
     console.log('Rendering images:', images); // Логируем перед рендером
-    gallery.insertAdjacentHTML('beforeend', createGalleryMarkup(images));
+    createGalleryMarkup(images);
     lightbox.refresh();
   } else {
     console.warn('No valid images to render.');

@@ -41,8 +41,39 @@
   }
 }
 .form {
-  margin: 0 auto;
-  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px auto;
+}
+
+/* Стили для инпута */
+.inp-css {
+  font-size: 25px;
+  height: 45px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  width: 250px;
+}
+
+.button {
+  background-color: #4caf50;
+  border: none;
+  color: white;
+  padding: 0 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  margin: 20px auto;
+}
+
+.button:hover {
+  background-color: #45a049;
 }
 
 .gallery {
@@ -65,6 +96,7 @@
   width: 360px;
   height: 200px;
   cursor: pointer;
+  border: solid, 1px;
 }
 .hidden {
   display: none;

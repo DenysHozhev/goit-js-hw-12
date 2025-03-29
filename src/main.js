@@ -5,7 +5,11 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 import { responseData } from './js/pixabay-api';
-import { createGalleryMarkup, clearGallery } from './js/render-functions';
+import {
+  createGalleryMarkup,
+  clearGallery,
+  initLightbox,
+} from './js/render-functions';
 
 const form = document.querySelector('.form');
 const loader = document.querySelector('.loader');
@@ -16,12 +20,7 @@ let query = '';
 let currentPage = 1;
 let totalHits = 0; // Глобальная переменная для общего количества изображений
 
-const lightbox = new SimpleLightbox('.gallery a', {
-  captions: true,
-  captionsData: 'alt',
-  captionDelay: 250,
-  animationSpeed: 350,
-});
+let lightbox = initLightbox(); // Инициализация SimpleLightbox
 
 form.addEventListener('submit', userInputForm);
 loadButton.addEventListener('click', loadMoreImage);
@@ -62,8 +61,12 @@ async function userInputForm(event) {
     // Обновляем глобальное количество изображений
     totalHits = fetchedTotalHits;
 
-    renderImages(hits);
-    lightbox.refresh();
+    // Отображаем изображения
+    createGalleryMarkup(hits, lightbox); // Передаем lightbox в функцию для обновления
+    lightbox.refresh(); // Обновление lightbox
+
+    // Прокручиваем страницу к первому новому изображению
+    scrollToFirstNewImage(hits);
 
     if (Math.ceil(totalHits / 15) === currentPage) {
       iziToast.show({
@@ -86,16 +89,6 @@ async function userInputForm(event) {
   }
 }
 
-function renderImages(images) {
-  if (Array.isArray(images) && images.length > 0) {
-    console.log('Rendering images:', images); // Логируем перед рендером
-    createGalleryMarkup(images);
-    lightbox.refresh();
-  } else {
-    console.warn('No valid images to render.');
-  }
-}
-
 async function loadMoreImage() {
   if (currentPage * 15 < totalHits) {
     loader.classList.remove('hidden');
@@ -108,7 +101,11 @@ async function loadMoreImage() {
 
       // Проверка на пустой ответ
       if (hits && hits.length > 0) {
-        renderImages(hits);
+        createGalleryMarkup(hits, lightbox); // Передаем lightbox для обновления
+        lightbox.refresh(); // Обновление lightbox
+
+        // Прокручиваем страницу к первому новому изображению
+        scrollToFirstNewImage(hits);
       } else {
         console.warn('No more images found.');
       }
@@ -130,5 +127,19 @@ async function loadMoreImage() {
     } finally {
       loader.classList.add('hidden');
     }
+  }
+}
+
+// Функция для прокрутки страницы к первому новому изображению
+function scrollToFirstNewImage(hits) {
+  // Находим первое изображение, которое было добавлено на текущей странице
+  const firstNewImage = gallery.querySelector(
+    '.gallery-item:nth-last-child(' + hits.length + ')'
+  ); // Берем первое добавленное изображение
+  if (firstNewImage) {
+    firstNewImage.scrollIntoView({
+      behavior: 'smooth', // Плавная прокрутка
+      block: 'start', // Прокрутка до начала элемента
+    });
   }
 }

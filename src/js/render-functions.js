@@ -3,13 +3,22 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const gallery = document.querySelector('.gallery');
-let lightbox = new SimpleLightbox('.gallery a');
+
+// Ініціалізація SimpleLightbox
+export function initLightbox() {
+  return new SimpleLightbox('.gallery a', {
+    captions: true,
+    captionsData: 'alt',
+    captionDelay: 250,
+    animationSpeed: 350,
+  });
+}
 
 // Функція для створення розмітки галереї
-export function createGalleryMarkup(images) {
+export function createGalleryMarkup(images, lightbox) {
   // Перевіряємо, чи є валідні зображення
   const validImages = images.filter(image => {
-    return image.largeImageURL && image.webformatURL && image.tags; // Перевіряємо наявність необхідних даних
+    return image.largeImageURL && image.webformatURL && image.tags; // Перевірка на наявність необхідних даних
   });
 
   // Якщо є валідні зображення, додаємо їх в галерею
@@ -37,8 +46,10 @@ export function createGalleryMarkup(images) {
         .join('')
     );
 
-    // Оновлюємо SimpleLightbox
-    lightbox.refresh();
+    // Оновлюємо SimpleLightbox після рендерингу нових зображень
+    if (lightbox) {
+      lightbox.refresh(); // Оновлення інстансу SimpleLightbox для нових елементів
+    }
   } else {
     console.warn('No valid images to render.');
   }
